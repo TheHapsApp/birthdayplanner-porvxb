@@ -178,57 +178,65 @@
   </style>
 </head>
 <body>
-  <h1>🎉 Ben's Birthday Planner 🎉</h1>
-  <p class="sub">Fill in the boxes to plan your party!</p>
+  <div id="editSection">
+    <h1>🎉 Ben's Birthday Planner 🎉</h1>
+    <p class="sub">Fill in the boxes to plan your party!</p>
 
-  <div class="boxes">
-    <div class="box">
-      <div class="box-title">🎂 Whose Birthday?</div>
-      <input class="box-input" id="birthdayPersonInput" type="text" maxlength="30" placeholder="Type a name">
-    </div>
-
-    <div class="box">
-      <div class="box-title">🎨 Theme</div>
-      <input class="box-input" id="themeInput" type="text" maxlength="40" placeholder="Like Dinosaurs, Space, Unicorns...">
-    </div>
-
-    <div class="box">
-      <div class="box-title">👥 Who's Coming</div>
-      <div class="add-row">
-        <input class="box-input" id="guestInput" type="text" maxlength="24" placeholder="Add a name">
-        <button class="add-btn" id="guestAddBtn">➕</button>
+    <div class="boxes">
+      <div class="box">
+        <div class="box-title">🎂 Whose Birthday?</div>
+        <input class="box-input" id="birthdayPersonInput" type="text" maxlength="30" placeholder="Type a name">
       </div>
-      <div class="item-list" id="guestList"></div>
-      <div class="empty-hint" id="guestEmptyHint">No one added yet!</div>
-    </div>
 
-    <div class="box">
-      <div class="box-title">🍕 Food</div>
-      <div class="add-row">
-        <input class="box-input" id="foodInput" type="text" maxlength="24" placeholder="Add a food">
-        <button class="add-btn" id="foodAddBtn">➕</button>
+      <div class="box">
+        <div class="box-title">🎨 Theme</div>
+        <input class="box-input" id="themeInput" type="text" maxlength="40" placeholder="Like Dinosaurs, Space, Unicorns...">
       </div>
-      <div class="item-list" id="foodList"></div>
-      <div class="empty-hint" id="foodEmptyHint">No food added yet!</div>
+
+      <div class="box">
+        <div class="box-title">📍 Where</div>
+        <input class="box-input" id="whereInput" type="text" maxlength="40" placeholder="Like Grandma's house, the park...">
+      </div>
+
+      <div class="box">
+        <div class="box-title">👥 Who's Coming</div>
+        <div class="add-row">
+          <input class="box-input" id="guestInput" type="text" maxlength="24" placeholder="Add a name">
+          <button class="add-btn" id="guestAddBtn">➕</button>
+        </div>
+        <div class="item-list" id="guestList"></div>
+        <div class="empty-hint" id="guestEmptyHint">No one added yet!</div>
+      </div>
+
+      <div class="box">
+        <div class="box-title">🍕 Food</div>
+        <div class="add-row">
+          <input class="box-input" id="foodInput" type="text" maxlength="24" placeholder="Add a food">
+          <button class="add-btn" id="foodAddBtn">➕</button>
+        </div>
+        <div class="item-list" id="foodList"></div>
+        <div class="empty-hint" id="foodEmptyHint">No food added yet!</div>
+      </div>
+
+      <div class="box">
+        <div class="box-title">🕐 Time</div>
+        <input class="box-input" id="timeInput" type="time">
+      </div>
+
+      <div class="box">
+        <div class="box-title">📅 Day</div>
+        <input class="box-input" id="dayInput" type="date">
+      </div>
     </div>
 
-    <div class="box">
-      <div class="box-title">🕐 Time</div>
-      <input class="box-input" id="timeInput" type="time">
-    </div>
-
-    <div class="box">
-      <div class="box-title">📅 Day</div>
-      <input class="box-input" id="dayInput" type="date">
-    </div>
+    <button class="show-plan-btn" id="showPlanBtn">🎉 Show My Party Plan!</button>
   </div>
-
-  <button class="show-plan-btn" id="showPlanBtn">🎉 Show My Party Plan!</button>
 
   <div class="plan-card" id="planCard">
     <div class="plan-title" id="planTitle">🎂 The Party Plan! 🎂</div>
     <div class="plan-line" id="planBirthdayPerson"></div>
     <div class="plan-line" id="planTheme"></div>
+    <div class="plan-line" id="planWhere"></div>
     <div class="plan-line" id="planWhen"></div>
     <div class="plan-line" id="planGuests"></div>
     <div class="plan-line" id="planFood"></div>
@@ -240,6 +248,7 @@
 
     var birthdayPersonInput = document.getElementById("birthdayPersonInput");
     var themeInput = document.getElementById("themeInput");
+    var whereInput = document.getElementById("whereInput");
     var guestInput = document.getElementById("guestInput");
     var foodInput = document.getElementById("foodInput");
     var timeInput = document.getElementById("timeInput");
@@ -318,7 +327,7 @@
       if (e.key === "Enter") { e.preventDefault(); addFood(); }
     });
 
-    [birthdayPersonInput, themeInput, timeInput, dayInput].forEach(function (el) {
+    [birthdayPersonInput, themeInput, whereInput, timeInput, dayInput].forEach(function (el) {
       el.addEventListener("input", savePlan);
       el.addEventListener("change", savePlan);
     });
@@ -327,6 +336,7 @@
       var data = {
         birthdayPerson: birthdayPersonInput.value,
         theme: themeInput.value,
+        where: whereInput.value,
         guests: guests,
         foods: foods,
         time: timeInput.value,
@@ -345,6 +355,7 @@
 
       birthdayPersonInput.value = data.birthdayPerson || "";
       themeInput.value = data.theme || "";
+      whereInput.value = data.where || "";
       timeInput.value = data.time || "";
       dayInput.value = data.day || "";
       guests = Array.isArray(data.guests) ? data.guests : [];
@@ -381,6 +392,9 @@
       document.getElementById("planBirthdayPerson").innerHTML = "<b>Birthday:</b> " + (birthdayPerson || "Not picked yet!");
       document.getElementById("planTheme").innerHTML = "<b>Theme:</b> " + (theme || "Not picked yet!");
 
+      var where = whereInput.value.trim();
+      document.getElementById("planWhere").innerHTML = "<b>Where:</b> " + (where || "Not picked yet!");
+
       var dayText = formatDay(dayInput.value);
       var timeText = formatTime(timeInput.value);
       var whenText = "<b>When:</b> ";
@@ -393,13 +407,15 @@
       document.getElementById("planGuests").innerHTML = "<b>Guests:</b> " + (guests.length ? guests.join(", ") : "Nobody added yet!");
       document.getElementById("planFood").innerHTML = "<b>Food:</b> " + (foods.length ? foods.join(", ") : "Nothing added yet!");
 
+      document.getElementById("editSection").style.display = "none";
       document.getElementById("planCard").classList.add("show");
-      document.getElementById("planCard").scrollIntoView({ behavior: "smooth", block: "start" });
+      window.scrollTo({ top: 0, behavior: "smooth" });
     });
 
     document.getElementById("planEditBtn").addEventListener("click", function () {
       document.getElementById("planCard").classList.remove("show");
-      document.querySelector(".boxes").scrollIntoView({ behavior: "smooth", block: "start" });
+      document.getElementById("editSection").style.display = "";
+      window.scrollTo({ top: 0, behavior: "smooth" });
     });
 
     loadPlan();
