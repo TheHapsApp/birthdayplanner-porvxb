@@ -169,6 +169,11 @@
 
   <div class="boxes">
     <div class="box">
+      <div class="box-title">🎂 Whose Birthday?</div>
+      <input class="box-input" id="birthdayPersonInput" type="text" maxlength="30" placeholder="Type a name">
+    </div>
+
+    <div class="box">
       <div class="box-title">🎨 Theme</div>
       <input class="box-input" id="themeInput" type="text" maxlength="40" placeholder="Like Dinosaurs, Space, Unicorns...">
     </div>
@@ -208,6 +213,7 @@
 
   <div class="plan-card" id="planCard">
     <div class="plan-title" id="planTitle">🎂 The Party Plan! 🎂</div>
+    <div class="plan-line" id="planBirthdayPerson"></div>
     <div class="plan-line" id="planTheme"></div>
     <div class="plan-line" id="planWhen"></div>
     <div class="plan-line" id="planGuests"></div>
@@ -217,6 +223,7 @@
   <script>
     var STORAGE_KEY = "bensBirthdayPlan";
 
+    var birthdayPersonInput = document.getElementById("birthdayPersonInput");
     var themeInput = document.getElementById("themeInput");
     var guestInput = document.getElementById("guestInput");
     var foodInput = document.getElementById("foodInput");
@@ -296,13 +303,14 @@
       if (e.key === "Enter") { e.preventDefault(); addFood(); }
     });
 
-    [themeInput, timeInput, dayInput].forEach(function (el) {
+    [birthdayPersonInput, themeInput, timeInput, dayInput].forEach(function (el) {
       el.addEventListener("input", savePlan);
       el.addEventListener("change", savePlan);
     });
 
     function savePlan() {
       var data = {
+        birthdayPerson: birthdayPersonInput.value,
         theme: themeInput.value,
         guests: guests,
         foods: foods,
@@ -320,6 +328,7 @@
       try { data = JSON.parse(raw); } catch (e) { return; }
       if (!data) return;
 
+      birthdayPersonInput.value = data.birthdayPerson || "";
       themeInput.value = data.theme || "";
       timeInput.value = data.time || "";
       dayInput.value = data.day || "";
@@ -344,11 +353,17 @@
     }
 
     document.getElementById("showPlanBtn").addEventListener("click", function () {
+      var birthdayPerson = birthdayPersonInput.value.trim();
       var theme = themeInput.value.trim();
-      document.getElementById("planTitle").textContent = theme
-        ? "🎂 " + theme + " Birthday Party! 🎂"
-        : "🎂 The Party Plan! 🎂";
 
+      var title;
+      if (birthdayPerson && theme) title = "🎂 " + birthdayPerson + "'s " + theme + " Birthday Party! 🎂";
+      else if (birthdayPerson) title = "🎂 " + birthdayPerson + "'s Birthday Party! 🎂";
+      else if (theme) title = "🎂 " + theme + " Birthday Party! 🎂";
+      else title = "🎂 The Party Plan! 🎂";
+      document.getElementById("planTitle").textContent = title;
+
+      document.getElementById("planBirthdayPerson").innerHTML = "<b>Birthday:</b> " + (birthdayPerson || "Not picked yet!");
       document.getElementById("planTheme").innerHTML = "<b>Theme:</b> " + (theme || "Not picked yet!");
 
       var dayText = formatDay(dayInput.value);
