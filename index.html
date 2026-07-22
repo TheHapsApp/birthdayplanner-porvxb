@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Keep this page off Google so it stays our secret -->
+  <meta name="robots" content="noindex, nofollow">
+  <title>Ben's Birthday Planner</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%89%3C/text%3E%3C/svg%3E">
+  <style>
+    :root {
+      --p1: #ff5fa2;
+      --p2: #ffd23f;
+      --p3: #3fd0ff;
+      --p4: #8a5cff;
+      --p5: #4ade80;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-user-select: none; user-select: none; }
+    html, body { height: 100%; }
+    body {
+      font-family: "Comic Sans MS", "Trebuchet MS", system-ui, sans-serif;
+      min-height: 100vh;
+      color: #fff;
+      text-align: center;
+      background: linear-gradient(120deg, var(--p1), var(--p4), var(--p3), var(--p2));
+      background-size: 400% 400%;
+      animation: flow 16s ease infinite;
+      padding: 26px 16px 60px;
+    }
+    @keyframes flow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    h1 {
+      font-size: clamp(1.7rem, 7vw, 2.6rem);
+      text-shadow: 3px 3px 0 rgba(0,0,0,0.2);
+    }
+    .sub {
+      font-size: clamp(0.9rem, 3.2vw, 1.1rem);
+      margin: 8px 0 26px;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.15);
+    }
+
+    /* ---- Boxes grid ---- */
+    .boxes {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 16px;
+      max-width: 720px;
+      margin: 0 auto 24px;
+    }
+    .box {
+      background: rgba(255,255,255,0.2);
+      border: 4px solid #fff;
+      border-radius: 22px;
+      padding: 18px 16px;
+      box-shadow: 0 6px 0 rgba(0,0,0,0.2);
+      text-align: left;
+    }
+    .box-title {
+      font-size: 1.15rem;
+      font-weight: bold;
+      margin-bottom: 12px;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.2);
+      text-align: center;
+    }
+    .box-input {
+      width: 100%;
+      font-family: inherit;
+      font-size: 1rem;
+      color: #333;
+      background: #fff;
+      border: 3px solid #fff;
+      border-radius: 12px;
+      padding: 10px;
+    }
+    .add-row { display: flex; gap: 8px; margin-bottom: 10px; }
+    .add-row .box-input { flex: 1; }
+    .add-btn {
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: bold;
+      color: #fff;
+      background: rgba(74,222,128,0.5);
+      border: 3px solid #fff;
+      border-radius: 12px;
+      padding: 10px 14px;
+      cursor: pointer;
+      flex: 0 0 auto;
+    }
+    .add-btn:active { transform: translateY(2px); }
+    .item-list { display: flex; flex-direction: column; gap: 6px; }
+    .item-pill {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255,255,255,0.25);
+      border: 2px solid #fff;
+      border-radius: 999px;
+      padding: 6px 10px 6px 14px;
+      font-size: 0.95rem;
+      font-weight: bold;
+    }
+    .item-remove {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #ff3b3b;
+      color: #fff;
+      border: 2px solid #fff;
+      font-size: 0.7rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex: 0 0 auto;
+    }
+    .empty-hint { font-size: 0.85rem; opacity: 0.8; text-align: center; }
+
+    /* ---- Show plan button ---- */
+    .show-plan-btn {
+      display: block;
+      margin: 10px auto 24px;
+      font-family: inherit;
+      font-size: clamp(1rem, 4.5vw, 1.3rem);
+      font-weight: bold;
+      color: #fff;
+      background: rgba(255,255,255,0.24);
+      border: 4px solid #fff;
+      border-radius: 999px;
+      padding: 14px 30px;
+      box-shadow: 0 7px 0 rgba(0,0,0,0.2);
+      cursor: pointer;
+    }
+    .show-plan-btn:active { transform: translateY(5px); box-shadow: 0 2px 0 rgba(0,0,0,0.2); }
+
+    /* ---- Plan summary card ---- */
+    .plan-card {
+      display: none;
+      max-width: 480px;
+      margin: 0 auto;
+      background: rgba(255,255,255,0.24);
+      border: 4px solid #fff;
+      border-radius: 26px;
+      padding: 24px 22px;
+      box-shadow: 0 8px 0 rgba(0,0,0,0.2);
+      animation: popIn 0.35s ease;
+    }
+    .plan-card.show { display: block; }
+    @keyframes popIn {
+      0%   { transform: scale(0.7); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .plan-title {
+      font-size: clamp(1.3rem, 6vw, 1.8rem);
+      font-weight: bold;
+      margin-bottom: 14px;
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+    }
+    .plan-line { font-size: 1.05rem; margin-bottom: 10px; text-align: left; }
+    .plan-line b { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <h1>🎉 Ben's Birthday Planner 🎉</h1>
+  <p class="sub">Fill in the boxes to plan your party!</p>
+
+  <div class="boxes">
+    <div class="box">
+      <div class="box-title">🎨 Theme</div>
+      <input class="box-input" id="themeInput" type="text" maxlength="40" placeholder="Like Dinosaurs, Space, Unicorns...">
+    </div>
+
+    <div class="box">
+      <div class="box-title">👥 Who's Coming</div>
+      <div class="add-row">
+        <input class="box-input" id="guestInput" type="text" maxlength="24" placeholder="Add a name">
+        <button class="add-btn" id="guestAddBtn">➕</button>
+      </div>
+      <div class="item-list" id="guestList"></div>
+      <div class="empty-hint" id="guestEmptyHint">No one added yet!</div>
+    </div>
+
+    <div class="box">
+      <div class="box-title">🍕 Food</div>
+      <div class="add-row">
+        <input class="box-input" id="foodInput" type="text" maxlength="24" placeholder="Add a food">
+        <button class="add-btn" id="foodAddBtn">➕</button>
+      </div>
+      <div class="item-list" id="foodList"></div>
+      <div class="empty-hint" id="foodEmptyHint">No food added yet!</div>
+    </div>
+
+    <div class="box">
+      <div class="box-title">🕐 Time</div>
+      <input class="box-input" id="timeInput" type="time">
+    </div>
+
+    <div class="box">
+      <div class="box-title">📅 Day</div>
+      <input class="box-input" id="dayInput" type="date">
+    </div>
+  </div>
+
+  <button class="show-plan-btn" id="showPlanBtn">🎉 Show My Party Plan!</button>
+
+  <div class="plan-card" id="planCard">
+    <div class="plan-title" id="planTitle">🎂 The Party Plan! 🎂</div>
+    <div class="plan-line" id="planTheme"></div>
+    <div class="plan-line" id="planWhen"></div>
+    <div class="plan-line" id="planGuests"></div>
+    <div class="plan-line" id="planFood"></div>
+  </div>
+
+  <script>
+    var STORAGE_KEY = "bensBirthdayPlan";
+
+    var themeInput = document.getElementById("themeInput");
+    var guestInput = document.getElementById("guestInput");
+    var foodInput = document.getElementById("foodInput");
+    var timeInput = document.getElementById("timeInput");
+    var dayInput = document.getElementById("dayInput");
+
+    var guestList = document.getElementById("guestList");
+    var foodList = document.getElementById("foodList");
+    var guestEmptyHint = document.getElementById("guestEmptyHint");
+    var foodEmptyHint = document.getElementById("foodEmptyHint");
+
+    var guests = [];
+    var foods = [];
+
+    function renderItemList(listEl, emptyHintEl, items, onRemove) {
+      listEl.innerHTML = "";
+      emptyHintEl.style.display = items.length ? "none" : "block";
+      items.forEach(function (name, index) {
+        var pill = document.createElement("div");
+        pill.className = "item-pill";
+
+        var label = document.createElement("span");
+        label.textContent = name;
+        pill.appendChild(label);
+
+        var removeBtn = document.createElement("div");
+        removeBtn.className = "item-remove";
+        removeBtn.textContent = "✖";
+        removeBtn.addEventListener("click", function () { onRemove(index); });
+        pill.appendChild(removeBtn);
+
+        listEl.appendChild(pill);
+      });
+    }
+
+    function renderGuests() {
+      renderItemList(guestList, guestEmptyHint, guests, function (index) {
+        guests.splice(index, 1);
+        renderGuests();
+        savePlan();
+      });
+    }
+
+    function renderFoods() {
+      renderItemList(foodList, foodEmptyHint, foods, function (index) {
+        foods.splice(index, 1);
+        renderFoods();
+        savePlan();
+      });
+    }
+
+    function addGuest() {
+      var name = guestInput.value.trim();
+      if (!name) return;
+      guests.push(name);
+      guestInput.value = "";
+      renderGuests();
+      savePlan();
+    }
+
+    function addFood() {
+      var name = foodInput.value.trim();
+      if (!name) return;
+      foods.push(name);
+      foodInput.value = "";
+      renderFoods();
+      savePlan();
+    }
+
+    document.getElementById("guestAddBtn").addEventListener("click", addGuest);
+    guestInput.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") { e.preventDefault(); addGuest(); }
+    });
+
+    document.getElementById("foodAddBtn").addEventListener("click", addFood);
+    foodInput.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") { e.preventDefault(); addFood(); }
+    });
+
+    [themeInput, timeInput, dayInput].forEach(function (el) {
+      el.addEventListener("input", savePlan);
+      el.addEventListener("change", savePlan);
+    });
+
+    function savePlan() {
+      var data = {
+        theme: themeInput.value,
+        guests: guests,
+        foods: foods,
+        time: timeInput.value,
+        day: dayInput.value
+      };
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (e) {}
+    }
+
+    function loadPlan() {
+      var raw;
+      try { raw = localStorage.getItem(STORAGE_KEY); } catch (e) { return; }
+      if (!raw) return;
+      var data;
+      try { data = JSON.parse(raw); } catch (e) { return; }
+      if (!data) return;
+
+      themeInput.value = data.theme || "";
+      timeInput.value = data.time || "";
+      dayInput.value = data.day || "";
+      guests = Array.isArray(data.guests) ? data.guests : [];
+      foods = Array.isArray(data.foods) ? data.foods : [];
+      renderGuests();
+      renderFoods();
+    }
+
+    function formatDay(dayStr) {
+      if (!dayStr) return null;
+      var d = new Date(dayStr + "T00:00:00");
+      return d.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
+    }
+
+    function formatTime(timeStr) {
+      if (!timeStr) return null;
+      var parts = timeStr.split(":");
+      var d = new Date();
+      d.setHours(parseInt(parts[0], 10), parseInt(parts[1], 10), 0, 0);
+      return d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+    }
+
+    document.getElementById("showPlanBtn").addEventListener("click", function () {
+      var theme = themeInput.value.trim();
+      document.getElementById("planTitle").textContent = theme
+        ? "🎂 " + theme + " Birthday Party! 🎂"
+        : "🎂 The Party Plan! 🎂";
+
+      document.getElementById("planTheme").innerHTML = "<b>Theme:</b> " + (theme || "Not picked yet!");
+
+      var dayText = formatDay(dayInput.value);
+      var timeText = formatTime(timeInput.value);
+      var whenText = "<b>When:</b> ";
+      if (dayText && timeText) whenText += dayText + " at " + timeText;
+      else if (dayText) whenText += dayText;
+      else if (timeText) whenText += timeText;
+      else whenText += "Not picked yet!";
+      document.getElementById("planWhen").innerHTML = whenText;
+
+      document.getElementById("planGuests").innerHTML = "<b>Guests:</b> " + (guests.length ? guests.join(", ") : "Nobody added yet!");
+      document.getElementById("planFood").innerHTML = "<b>Food:</b> " + (foods.length ? foods.join(", ") : "Nothing added yet!");
+
+      document.getElementById("planCard").classList.add("show");
+    });
+
+    loadPlan();
+  </script>
+</body>
+</html>
